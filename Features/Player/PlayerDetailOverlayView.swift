@@ -571,7 +571,7 @@ struct PlayerDetailOverlayView: View {
                     coordinator.queueManager.isShuffled.toggle()
                 } label: {
                     Image(systemName: "shuffle")
-                        .foregroundStyle(coordinator.queueManager.isShuffled ? .red : .secondary)
+                        .foregroundStyle(coordinator.queueManager.isShuffled ? Color.red : Color.secondary)
                 }
                 Button {
                     let modes = RepeatMode.allCases
@@ -580,7 +580,7 @@ struct PlayerDetailOverlayView: View {
                     }
                 } label: {
                     Image(systemName: coordinator.queueManager.repeatMode == .one ? "repeat.1" : "repeat")
-                        .foregroundStyle(coordinator.queueManager.repeatMode == .off ? .secondary : .red)
+                        .foregroundStyle(coordinator.queueManager.repeatMode == .off ? Color.secondary : Color.red)
                 }
             }
 

@@ -76,7 +76,7 @@ struct SubscriptionsView: View {
                     Task { await reloadFeedOnly(forceRefresh: false) }
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(selectedChannelID == nil ? .red : .gray)
+                .tint(selectedChannelID == nil ? Color.red : Color.gray)
 
                 ForEach(channels) { channel in
                     Button(channel.name) {
@@ -84,7 +84,7 @@ struct SubscriptionsView: View {
                         Task { await reloadFeedOnly(forceRefresh: false) }
                     }
                     .buttonStyle(.bordered)
-                    .tint(selectedChannelID == channel.channelId ? .red : .primary)
+                    .tint(selectedChannelID == channel.channelId ? Color.red : Color.primary)
                     .contextMenu {
                         Button("구독 삭제", role: .destructive) {
                             Task {

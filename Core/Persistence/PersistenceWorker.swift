@@ -29,10 +29,6 @@ actor PersistenceWorker: ModelActor, PersistenceWorkerProtocol {
     nonisolated let modelExecutor: any ModelExecutor
     nonisolated let modelContainer: ModelContainer
 
-    nonisolated var unownedExecutor: UnownedSerialExecutor {
-        modelExecutor.asUnownedSerialExecutor()
-    }
-
     private let changeContinuationsLock = OSAllocatedUnfairLock<[UUID: AsyncStream<PersistenceChangeDomain>.Continuation]>(initialState: [:])
 
     init(modelContainer: ModelContainer) {
