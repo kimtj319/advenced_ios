@@ -277,7 +277,7 @@ struct SubscriptionImporter: SubscriptionImporterProtocol {
     }
 }
 
-private nonisolated final class OPMLParserHelper: NSObject, XMLParserDelegate {
+private final class OPMLParserHelper: NSObject, XMLParserDelegate {
     private var candidates: [(line: Int, dto: SubscribedChannelDTO)] = []
     private var failures: [SubscriptionImportRowError] = []
     private var outlineCounter = 0

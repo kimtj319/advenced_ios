@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Home tab displaying merged subscription feeds with Clean Feed filtering applied.
 struct HomeFeedView: View {
@@ -98,7 +99,7 @@ struct VideoRowView: View {
                 case .success(let image):
                     image.resizable().aspectRatio(16 / 9, contentMode: .fill)
                 default:
-                    Rectangle().fill(Color(.secondarySystemBackground))
+                    Rectangle().fill(Color(uiColor: .secondarySystemBackground))
                 }
             }
             .frame(width: 128, height: 72)

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Root container holding the 5-tab UI and the single persistent `PlayerRenderHostView` across all 4 modes.
 struct AppRootView: View {
@@ -88,7 +89,7 @@ struct AppRootView: View {
                         volumeController: volumeController
                     )
                     .frame(width: containerSize.width, height: containerSize.height)
-                    .background(coordinator.displayMode == .fullscreen ? Color.black : Color(.systemBackground))
+                    .background(coordinator.displayMode == .fullscreen ? Color.black : Color(uiColor: .systemBackground))
                     .defersSystemGestures(on: coordinator.displayMode == .fullscreen ? [.top, .bottom] : [])
                 }
 

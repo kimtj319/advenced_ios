@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Detailed player view providing the 16:9 placeholder aligned to `PlayerRenderHostView`, HUD controls, and metadata.
 struct PlayerDetailOverlayView: View {
@@ -26,7 +27,7 @@ struct PlayerDetailOverlayView: View {
                     metadataAndQueueSection
                         .padding()
                 }
-                .background(Color(.systemBackground))
+                .background(Color(uiColor: .systemBackground))
             } else if coordinator.displayMode == .fullscreen {
                 fullscreenControlBox
             }
@@ -418,7 +419,7 @@ struct PlayerDetailOverlayView: View {
                     .tint(.blue)
             }
             .padding(12)
-            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+            .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
 
         case .unavailable:
             HStack(spacing: 12) {
@@ -503,7 +504,7 @@ struct PlayerDetailOverlayView: View {
             }
         }
         .padding(12)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
     }
 
     private var bookmarksSection: some View {
@@ -557,7 +558,7 @@ struct PlayerDetailOverlayView: View {
             }
         }
         .padding(12)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
     }
 
     private var queueSection: some View {
@@ -610,7 +611,7 @@ struct PlayerDetailOverlayView: View {
             }
         }
         .padding(12)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+        .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
     }
 
     private var addBookmarkSheet: some View {

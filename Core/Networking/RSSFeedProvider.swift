@@ -173,7 +173,7 @@ actor RSSFeedProvider {
     }
 }
 
-private nonisolated final class RSSAtomParserHelper: NSObject, XMLParserDelegate {
+private final class RSSAtomParserHelper: NSObject, XMLParserDelegate {
     private let fallbackChannelId: String
     private var elementStack: [String] = []
     private var currentText = ""
