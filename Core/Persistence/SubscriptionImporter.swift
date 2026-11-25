@@ -72,9 +72,9 @@ struct SubscriptionImporter: SubscriptionImporterProtocol {
             throw SubscriptionImportError.unsupportedEncoding
         }
 
-        // Strip UTF-8 BOM if present.
-        if text.hasPrefix("\u{FEFF}") {
-            text.removeFirst()
+        // Strip UTF-8 BOM if present (scalar-safe against grapheme clustering).
+        if text.unicodeScalars.first == "\u{FEFF}" {
+            text = String(text.unicodeScalars.dropFirst())
         }
 
         let rows = parseRFC4180CSV(text)
@@ -234,16 +234,14 @@ struct SubscriptionImporter: SubscriptionImporterProtocol {
                 } else if ch == "," {
                     currentRow.append(currentField)
                     currentField = ""
-                } else if ch == "\r" {
-                    let next = text.index(after: index)
-                    if next < text.endIndex && text[next] == "\n" {
-                        index = next
+                } else if ch == "\r\n" || ch == "\r" || ch == "\n" {
+                    // Swift treats "\r\n" as a single extended grapheme cluster Character.
+                    if ch == "\r" {
+                        let next = text.index(after: index)
+                        if next < text.endIndex && text[next] == "\n" {
+                            index = next
+                        }
                     }
-                    currentRow.append(currentField)
-                    rows.append(currentRow)
-                    currentRow = []
-                    currentField = ""
-                } else if ch == "\n" {
                     currentRow.append(currentField)
                     rows.append(currentRow)
                     currentRow = []

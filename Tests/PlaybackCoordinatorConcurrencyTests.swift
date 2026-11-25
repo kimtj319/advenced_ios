@@ -215,7 +215,8 @@ final class PlaybackCoordinatorConcurrencyTests: XCTestCase {
         coordinator.play(video: videoA)
         try? await Task.sleep(for: .milliseconds(10))
         coordinator.play(video: videoB)
-        try? await Task.sleep(for: .milliseconds(150))
+        await waitUntil { native.loadedSources.count >= 1 }
+        try? await Task.sleep(for: .milliseconds(100))
 
         XCTAssertEqual(coordinator.currentVideo?.id, "vidB")
         XCTAssertEqual(native.loadedSources.count, 1)
@@ -257,11 +258,11 @@ final class PlaybackCoordinatorConcurrencyTests: XCTestCase {
         coordinator.attachRenderSurface(surface)
 
         coordinator.play(video: VideoItem(id: "direct1", title: "Direct", channelId: "c1", channelTitle: "Ch", duration: 120))
-        try? await Task.sleep(for: .milliseconds(50))
+        await waitUntil { !native.loadedSources.isEmpty }
         sequenceLog.removeAll()
 
         coordinator.play(video: VideoItem(id: "embed2", title: "Embed", channelId: "c1", channelTitle: "Ch", duration: 120))
-        try? await Task.sleep(for: .milliseconds(50))
+        await waitUntil { !web.loadedSources.isEmpty }
 
         XCTAssertEqual(surface.activeSurface, .webView)
         XCTAssertTrue(sequenceLog.contains("stopAndClear:native"))
@@ -299,15 +300,26 @@ final class PlaybackCoordinatorConcurrencyTests: XCTestCase {
             persistence: persistence
         )
         coordinator.play(video: VideoItem(id: "exp1", title: "Expiring", channelId: "c1", channelTitle: "Ch", duration: 300))
-        try? await Task.sleep(for: .milliseconds(50))
+        await waitUntil { !native.loadedSources.isEmpty }
 
         native.currentTime = 77.5
         native.emit(.streamLikelyExpired(httpStatus: 403))
-        try? await Task.sleep(for: .milliseconds(100))
+        await waitUntil { !web.loadedSources.isEmpty }
 
         XCTAssertEqual(native.teardownCallCount, 1)
         XCTAssertEqual(web.loadedSources.count, 1)
         XCTAssertEqual(web.loadedSources.first?.1 ?? -1, 77.5, accuracy: 0.1)
+    }
+
+    @MainActor
+    private func waitUntil(
+        timeout: Duration = .seconds(1),
+        condition: @MainActor () -> Bool
+    ) async {
+        let deadline = ContinuousClock.now + timeout
+        while !condition() && ContinuousClock.now < deadline {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
     }
 
     @MainActor
@@ -343,12 +355,12 @@ final class PlaybackCoordinatorConcurrencyTests: XCTestCase {
 
         // Duration is initially nil (as from RSS feed).
         coordinator.play(video: VideoItem(id: "rss1", title: "RSS Video", channelId: "c1", channelTitle: "Ch", duration: nil))
-        try? await Task.sleep(for: .milliseconds(50))
+        await waitUntil { !native.loadedSources.isEmpty }
         XCTAssertTrue(native.seekHistory.isEmpty)
 
         // Once engine resolves finite duration = 120.0s (> 45 + 5), deferred resume seeks to 45.0s.
         native.emit(.durationChanged(.finite(120.0)))
-        try? await Task.sleep(for: .milliseconds(50))
+        await waitUntil { !native.seekHistory.isEmpty }
         XCTAssertEqual(native.seekHistory, [45.0])
     }
 

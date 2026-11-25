@@ -33,8 +33,8 @@ jobs:
             -scheme YouTubeAdvanced \
             -destination "platform=iOS Simulator,id=$SIM_UDID" 2>&1 | tee "$RUNNER_TEMP/xcodebuild_test.log"; then
             echo "=== FAILURE SUMMARY ==="
-            grep -nE "error:|fatal error:|Test Case .* failed|FAILED|\*\* TEST|CodeSign" "$RUNNER_TEMP/xcodebuild_test.log" | tail -n 80 || tail -n 80 "$RUNNER_TEMP/xcodebuild_test.log"
-            grep -nE "error:|fatal error:|Test Case .* failed|FAILED|\*\* TEST|CodeSign" "$RUNNER_TEMP/xcodebuild_test.log" | tail -n 10 | while IFS= read -r line; do
+            grep -nE "error:|fatal error:|Test Case .* failed|FAILED|\*\* TEST" "$RUNNER_TEMP/xcodebuild_test.log" | tail -n 80 || tail -n 80 "$RUNNER_TEMP/xcodebuild_test.log"
+            grep -nE "error:|fatal error:|Test Case .* failed|FAILED|\*\* TEST" "$RUNNER_TEMP/xcodebuild_test.log" | tail -n 10 | while IFS= read -r line; do
               echo "::error::$line"
             done
             exit 1
@@ -42,7 +42,8 @@ jobs:
 
       - name: Build Unsigned Release Archive
         run: |
-          xcodebuild archive \
+          set -o pipefail
+          if ! xcodebuild archive \
             -project YouTubeAdvanced.xcodeproj \
             -scheme YouTubeAdvanced \
             -configuration Release \
@@ -51,7 +52,12 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            AD_HOC_CODE_SIGNING_ALLOWED=NO
+            AD_HOC_CODE_SIGNING_ALLOWED=NO 2>&1 | tee "$RUNNER_TEMP/xcodebuild_archive.log"; then
+            grep -nE "error:|fatal error:|FAILED|\*\* ARCHIVE" "$RUNNER_TEMP/xcodebuild_archive.log" | tail -n 10 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            exit 1
+          fi
 
       - name: Package Unsigned IPA
         run: |

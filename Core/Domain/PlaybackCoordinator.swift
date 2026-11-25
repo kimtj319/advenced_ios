@@ -581,7 +581,7 @@ final class PlaybackCoordinator {
             return
         }
         let loadIDSnapshot = activeLoadID
-        let resumeTime = currentTime
+        let resumeTime = max(currentTime, activeEngine?.currentTime ?? 0)
         let decision = await recoveryController.attemptRecovery(
             for: video,
             lastKnownTime: resumeTime,

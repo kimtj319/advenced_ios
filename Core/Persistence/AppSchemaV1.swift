@@ -179,8 +179,8 @@ enum AppContainerFactory {
         let schema = Schema(versionedSchema: AppSchemaV1.self)
         let isTestEnv = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
 
-        // Stage 1: Test host or explicit in-memory short-circuit.
-        if forceInMemory || isTestEnv {
+        // Stage 1: Test host or explicit in-memory short-circuit (skip when testing a specific storeURL).
+        if forceInMemory || (isTestEnv && storeURL == nil) {
             let memConfig = ModelConfiguration(
                 schema: schema,
                 isStoredInMemoryOnly: true,
