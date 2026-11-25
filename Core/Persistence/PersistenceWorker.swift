@@ -1,4 +1,5 @@
 import Foundation
+import os
 import SwiftData
 
 protocol PersistenceWorkerProtocol: Sendable {
@@ -32,7 +33,7 @@ actor PersistenceWorker: ModelActor, PersistenceWorkerProtocol {
         modelExecutor.asUnownedSerialExecutor()
     }
 
-    private var changeContinuations: [UUID: AsyncStream<PersistenceChangeDomain>.Continuation] = [:]
+    private let changeContinuationsLock = OSAllocatedUnfairLock<[UUID: AsyncStream<PersistenceChangeDomain>.Continuation]>(initialState: [:])
 
     init(modelContainer: ModelContainer) {
         let context = ModelContext(modelContainer)
@@ -41,22 +42,25 @@ actor PersistenceWorker: ModelActor, PersistenceWorkerProtocol {
         self.modelExecutor = DefaultSerialModelExecutor(modelContext: context)
     }
 
-    func changeStream() -> AsyncStream<PersistenceChangeDomain> {
+    nonisolated func changeStream() -> AsyncStream<PersistenceChangeDomain> {
         let id = UUID()
         return AsyncStream(bufferingPolicy: .bufferingNewest(32)) { continuation in
-            changeContinuations[id] = continuation
+            changeContinuationsLock.withLock { $0[id] = continuation }
             continuation.onTermination = { [weak self] _ in
-                Task { await self?.removeContinuation(id: id) }
+                self?.removeContinuation(id: id)
             }
         }
     }
 
-    private func removeContinuation(id: UUID) {
-        changeContinuations.removeValue(forKey: id)
+    private nonisolated func removeContinuation(id: UUID) {
+        changeContinuationsLock.withLock {
+            _ = $0.removeValue(forKey: id)
+        }
     }
 
-    private func broadcast(_ domain: PersistenceChangeDomain) {
-        for continuation in changeContinuations.values {
+    private nonisolated func broadcast(_ domain: PersistenceChangeDomain) {
+        let active = changeContinuationsLock.withLock { Array($0.values) }
+        for continuation in active {
             continuation.yield(domain)
         }
     }
